@@ -6,6 +6,7 @@
 
 import random
 import math
+import pandas as pd
 import timeit
 import matplotlib.pyplot as plt
 
@@ -36,7 +37,7 @@ sigmaAct = sigmaIni * (euler)**(t*random.gauss(0,1))
 
 miu = 21
 lda = miu * 7
-gens = 200
+gens = 20
 start = -512
 end = 512
 
@@ -46,41 +47,57 @@ cuarenta = int(round(lda * 0.40))
 random.seed(1)
 parents = [(random.uniform(start, end), random.uniform(start, end)) for _ in range(miu)]
 
-TiempoInicio = timeit.default_timer()
-MejorMin = 0
-MejorXY = None
-MejorIteracion = 0
-HistorialFitness = [] 
+results = []
 
-for i in range(gens):
-    # offspringsRecom = [recombinarGlobal(parents) for _ in range(cuarenta)]
-    offspringsRecom = [recombinarLocal(random.choice(parents), random.choice(parents)) for _ in range(cuarenta)]
-    # offspringsRecom = [recombinarDiscreta(parents) for _ in range(cuarenta)]
-    offspringsMutar = [mutar(random.choice(parents), sigmaAct) for _ in range(sesenta)]
-    population = parents + offspringsMutar + offspringsRecom
-    fitness = eval_fitness(population)
-    MejorMinimoGen = min(fitness)
-    HistorialFitness.append(MejorMinimoGen)
-    if MejorMinimoGen < MejorMin:
-        MejorMin = MejorMinimoGen
-        MejorXY = population[fitness.index(MejorMinimoGen)]
-        MejorIteracion = i
-    parents = [population[j] for j in sorted(range(len(population)), key=lambda x: fitness[x])[:miu]]
+for execution in range(10): 
+    TiempoInicio = timeit.default_timer()
+    MejorMin = 0
+    MejorXY = None
+    MejorIteracion = 0
+    HistorialFitness = []
 
-TiempoFinal = timeit.default_timer()
-Duracion = TiempoFinal - TiempoInicio
+    for i in range(gens):
+        offspringsRecom = [recombinarLocal(random.choice(parents), random.choice(parents)) for _ in range(lda - miu)]
+        offspringsMutar = [mutar(random.choice(parents), sigmaAct) for _ in range(miu)]
+        population = parents + offspringsMutar + offspringsRecom
+        fitness = eval_fitness(population)
+        MejorMinimoGen = min(fitness)
+        HistorialFitness.append(MejorMinimoGen)
+        if MejorMinimoGen < MejorMin:
+            MejorMin = MejorMinimoGen
+            MejorXY = population[fitness.index(MejorMinimoGen)]
+            MejorIteracion = i
+        parents = [population[j] for j in sorted(range(len(population)), key=lambda x: fitness[x])[:miu]]
+    
+    TiempoFinal = timeit.default_timer()
+    Duracion = TiempoFinal - TiempoInicio
 
-print("El tiempo en encontrar la mejor solucion fue de: ", Duracion)
-print("La mejor solucion encontrada:", MejorMin)
-print("Valores con los que se obtuvo esa solucion:", MejorXY)
-print("Mejor solucion encontrada en la iteracion: ", MejorIteracion)
+    # Almacenar resultados
+    results.append({
+        'Duracion': Duracion,
+        'MejorMin': MejorMin,
+        'MejorXY': MejorXY,
+        'MejorIteracion': MejorIteracion
+    })
 
-plt.figure(figsize=(10, 5))
-plt.plot(range(gens), HistorialFitness, marker='o', linestyle='-', color='b')
-plt.title('Convergencia del Algoritmo a lo largo de las generaciones')
-plt.xlabel('Generación')
-plt.ylabel('Mejor Fitness')
-plt.grid(True)
-plt.show()
+    print("\nResultado iteracion", execution)
+    print("El tiempo en encontrar la mejor solucion fue de: ", Duracion)
+    print("La mejor solucion encontrada:", MejorMin)
+    print("Valores con los que se obtuvo esa solucion:", MejorXY)
+    print("Mejor solucion encontrada en la iteracion: ", MejorIteracion)
+
+    plt.figure(figsize=(10, 5))
+    plt.plot(range(gens), HistorialFitness, marker='o', linestyle='-', color='b')
+    plt.title('Convergencia del Algoritmo a lo largo de las generaciones')
+    plt.xlabel('Generación')
+    plt.ylabel('Mejor Fitness')
+    plt.grid(True)
+    plt.show()
+
+print(len(results))
+
+df = pd.DataFrame(results)
+df.to_csv("resultados_algoritmo_genetico.csv", index=False, sep=";")
+
 
 
