@@ -7,6 +7,7 @@
 import random
 import math
 import timeit
+import pandas as pd
 import matplotlib.pyplot as plt
 
 TiempoInicio = timeit.default_timer()
@@ -44,24 +45,37 @@ TiempoFinal = timeit.default_timer()
 Duracion = TiempoFinal - TiempoInicio
 
 Limites = (-512, 512)
-Iteraciones = 10000  
+Iteraciones = 5000
 Salto = 20           
-TempIni = 1000000    
-EnfriamientoRate = 0.9999
-TempFinal = 0.00001
+TempIni = 5000    
+EnfriamientoRate = 0.95
+TempFinal = 0.01
 
-xMejor, yMejor, evalMejor, iteracionMejor, valores_por_iteracion = simulated_annealing(Funcion, Limites, Iteraciones, Salto, TempIni, EnfriamientoRate, TempFinal)
+results = []
 
-print('El tiempo en encontrar la mejor solucion fue de: %.17f ' % Duracion)
-print("La mejor solucion encontrada:", evalMejor)
-print('Valores con los que se obtuvo esa solucion: x=%.6f, y=%.6f)' % (xMejor, yMejor))
-print("Mejor solucion encontrada en la iteracion: ", iteracionMejor)
+for execution in range(10): 
 
-plt.figure(figsize=(10, 5))
-plt.plot(valores_por_iteracion, marker='o', linestyle='-', color='b')
-plt.title('Valor de la función objetivo por iteración')
-plt.xlabel('Iteración')
-plt.ylabel('Valor de la función objetivo')
-plt.grid(True)
-plt.show()
+    xMejor, yMejor, evalMejor, iteracionMejor, valores_por_iteracion = simulated_annealing(Funcion, Limites, Iteraciones, Salto, TempIni, EnfriamientoRate, TempFinal)
 
+    print('El tiempo en encontrar la mejor solucion fue de: %.17f ' % Duracion)
+    print("La mejor solucion encontrada:", evalMejor)
+    print('Valores con los que se obtuvo esa solucion: x=%.6f, y=%.6f)' % (xMejor, yMejor))
+    print("Mejor solucion encontrada en la iteracion: ", iteracionMejor)
+
+    plt.figure(figsize=(10, 5))
+    plt.plot(valores_por_iteracion, marker='o', linestyle='-', color='b')
+    plt.title('Valor de la función objetivo por iteración')
+    plt.xlabel('Iteración')
+    plt.ylabel('Valor de la función objetivo')
+    plt.grid(True)
+    plt.show()
+
+    results.append({
+        'Duracion': Duracion,
+        'Mejor solución': evalMejor,
+        'Valores de la solución': (xMejor, yMejor),
+        'Mejor solución encontrada': iteracionMejor
+    })
+
+df = pd.DataFrame(results)
+df.to_csv("resultados_enfriamiento_simulado.csv", index=False, sep=";")
