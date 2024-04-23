@@ -14,7 +14,7 @@ TiempoInicio = timeit.default_timer()
 def Funcion(x, y):
     return -(y + 47) * math.sin(math.sqrt(abs(x/2 + (y + 47)))) - x * math.sin(math.sqrt(abs(x - (y + 47))))
 
-def simulated_annealing(funcion, limites, iteraciones, salto, temp, enfriamientoRate):
+def simulated_annealing(funcion, limites, iteraciones, salto, temp, enfriamientoRate, tempFinal):
 
     xIni, yIni = random.uniform(*limites), random.uniform(*limites)
     evalIni = funcion(xIni, yIni)
@@ -24,17 +24,19 @@ def simulated_annealing(funcion, limites, iteraciones, salto, temp, enfriamiento
     
     for i in range(iteraciones):
         temp *= enfriamientoRate
-        xNueva, yNueva = xIni + salto * (random.uniform(-1.0, 1.0)), yIni + salto * (random.uniform(-1.0, 1.0))
-        xNueva, yNueva = max(limites[0], min(xNueva, limites[1])), max(limites[0], min(yNueva, limites[1]))
-        evalNueva = funcion(xNueva, yNueva)
-        diff = evalNueva - evalIni
-        valores_por_iteracion.append(evalNueva)
-        
-        if diff < 0 or random.random() < math.exp(-diff / temp):
-            xIni, yIni, evalIni = xNueva, yNueva, evalNueva
-            if evalIni < evalMejor:
-                xMejor, yMejor, evalMejor = xIni, yIni, evalIni
-                iteracionMejor = i
+        if temp>tempFinal:
+            xNueva, yNueva = xIni + salto * (random.uniform(-1.0, 1.0)), yIni + salto * (random.uniform(-1.0, 1.0))
+            xNueva, yNueva = max(limites[0], min(xNueva, limites[1])), max(limites[0], min(yNueva, limites[1]))
+            evalNueva = funcion(xNueva, yNueva)
+            diff = evalNueva - evalIni
+            valores_por_iteracion.append(evalNueva)
+            
+            if diff < 0 or random.random() < math.exp(-diff / temp):
+                xIni, yIni, evalIni = xNueva, yNueva, evalNueva
+                if evalIni < evalMejor:
+                    xMejor, yMejor, evalMejor = xIni, yIni, evalIni
+                    iteracionMejor = i
+        else: break
 
     return (xMejor, yMejor, evalMejor, iteracionMejor, valores_por_iteracion)
 
@@ -43,11 +45,12 @@ Duracion = TiempoFinal - TiempoInicio
 
 Limites = (-512, 512)
 Iteraciones = 10000  
-Salto = 50           
-TempIni = 100000     
-EnfriamientoRate = 0.9995  
+Salto = 20           
+TempIni = 1000000    
+EnfriamientoRate = 0.9999
+TempFinal = 0.00001
 
-xMejor, yMejor, evalMejor, iteracionMejor, valores_por_iteracion = simulated_annealing(Funcion, Limites, Iteraciones, Salto, TempIni, EnfriamientoRate)
+xMejor, yMejor, evalMejor, iteracionMejor, valores_por_iteracion = simulated_annealing(Funcion, Limites, Iteraciones, Salto, TempIni, EnfriamientoRate, TempFinal)
 
 print('El tiempo en encontrar la mejor solucion fue de: %.17f ' % Duracion)
 print("La mejor solucion encontrada:", evalMejor)
