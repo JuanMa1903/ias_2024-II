@@ -6,7 +6,6 @@
 
 import random
 import math
-import pandas as pd
 import timeit
 import matplotlib.pyplot as plt
 
@@ -34,67 +33,50 @@ t= 1/math.sqrt(n)
 sigmaIni = 0.5 
 sigmaAct = sigmaIni * (euler)**(t*random.gauss(0,1))
 
-miu = 100 # tamaño poblacion
+miu = 500 # tamaño poblacion
 lda = miu * 7
-gens = 2000 # Número de iteraciones 
+gens = 45 # Número de iteraciones 
 start = -512
 end = 512
 
-sesenta = int(round(lda * 0.7)) # tasa de cruzamiento
-cuarenta = int(round(lda * 0.6)) # Tasa de mutación
+sesenta = int(round(lda * 0.45)) # tasa de cruzamiento
+cuarenta = int(round(lda * 0.55)) # Tasa de mutación
+
+parents = [(random.uniform(start, end), random.uniform(start, end)) for _ in range(miu)]
+MejorMin = 0
+MejorXY = None
+MejorIteracion = 0
+HistorialFitness = []
+
+TiempoInicio = timeit.default_timer()
 
 random.seed(1)
-parents = [(random.uniform(start, end), random.uniform(start, end)) for _ in range(miu)]
+for i in range(gens):
+    offspringsRecom = [recombinarLocal(random.choice(parents), random.choice(parents)) for _ in range(sesenta)]
+    offspringsMutar = [mutar(random.choice(parents), sigmaAct) for _ in range(cuarenta)]
+    population = parents + offspringsMutar + offspringsRecom
+    fitness = eval_fitness(population)
+    MejorMinimoGen = min(fitness)
+    HistorialFitness.append(MejorMinimoGen)
+    if MejorMinimoGen < MejorMin:
+        MejorMin = MejorMinimoGen
+        MejorXY = population[fitness.index(MejorMinimoGen)]
+        MejorIteracion = i
+    parents = [population[j] for j in sorted(range(len(population)), key=lambda x: fitness[x])[:miu]]
 
-results = []
+TiempoFinal = timeit.default_timer()
+Duracion = TiempoFinal - TiempoInicio
 
-for execution in range(10): 
-    TiempoInicio = timeit.default_timer()
-    MejorMin = 0
-    MejorXY = None
-    MejorIteracion = 0
-    HistorialFitness = []
+print("\nResultados de la ejecución")
+print("El tiempo en encontrar la mejor solucion fue de: ", Duracion)
+print("La mejor solucion encontrada:", MejorMin)
+print("Valores con los que se obtuvo esa solucion:", MejorXY)
+print("Mejor solucion encontrada en la iteracion: ", MejorIteracion)
 
-    for i in range(gens):
-        offspringsRecom = [recombinarLocal(random.choice(parents), random.choice(parents)) for _ in range(cuarenta)]
-        offspringsMutar = [mutar(random.choice(parents), sigmaAct) for _ in range(sesenta)]
-        population = parents + offspringsMutar + offspringsRecom
-        fitness = eval_fitness(population)
-        MejorMinimoGen = min(fitness)
-        HistorialFitness.append(MejorMinimoGen)
-        if MejorMinimoGen < MejorMin:
-            MejorMin = MejorMinimoGen
-            MejorXY = population[fitness.index(MejorMinimoGen)]
-            MejorIteracion = i
-        parents = [population[j] for j in sorted(range(len(population)), key=lambda x: fitness[x])[:miu]]
-    
-    TiempoFinal = timeit.default_timer()
-    Duracion = TiempoFinal - TiempoInicio
-
-    # Almacenar resultados
-    results.append({
-        'Duracion': Duracion,
-        'MejorMin': MejorMin,
-        'MejorXY': MejorXY,
-        'MejorIteracion': MejorIteracion
-    })
-
-    print("\nResultado iteracion", execution)
-    print("El tiempo en encontrar la mejor solucion fue de: ", Duracion)
-    print("La mejor solucion encontrada:", MejorMin)
-    print("Valores con los que se obtuvo esa solucion:", MejorXY)
-    print("Mejor solucion encontrada en la iteracion: ", MejorIteracion)
-
-    plt.figure(figsize=(10, 5))
-    plt.plot(range(gens), HistorialFitness, marker='o', linestyle='-', color='b')
-    plt.title('Convergencia del Algoritmo a lo largo de las generaciones')
-    plt.xlabel('Generación')
-    plt.ylabel('Mejor Fitness')
-    plt.grid(True)
-    plt.show()
-
-df = pd.DataFrame(results)
-df.to_csv("resultados_algoritmo_genetico.csv", index=False, sep=";")
-
-
-
+plt.figure(figsize=(10, 5))
+plt.plot(range(gens), HistorialFitness, marker='o', linestyle='-', color='b')
+plt.title('Convergencia del Algoritmo a lo largo de las generaciones')
+plt.xlabel('Generación')
+plt.ylabel('Mejor Fitness')
+plt.grid(True)
+plt.show()

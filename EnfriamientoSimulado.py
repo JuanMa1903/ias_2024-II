@@ -7,13 +7,12 @@
 import random
 import math
 import timeit
-import pandas as pd
 import matplotlib.pyplot as plt
-
-TiempoInicio = timeit.default_timer()
 
 def Funcion(x, y):
     return -(y + 47) * math.sin(math.sqrt(abs(x/2 + (y + 47)))) - x * math.sin(math.sqrt(abs(x - (y + 47))))
+
+TiempoInicio = timeit.default_timer()
 
 def simulated_annealing(funcion, limites, iteraciones, salto, temp, enfriamientoRate, tempFinal):
 
@@ -23,6 +22,7 @@ def simulated_annealing(funcion, limites, iteraciones, salto, temp, enfriamiento
     iteracionMejor = 0
     valores_por_iteracion = []
     
+    random.seed(1)
     for i in range(iteraciones):
         temp *= enfriamientoRate
         if temp>tempFinal:
@@ -39,43 +39,29 @@ def simulated_annealing(funcion, limites, iteraciones, salto, temp, enfriamiento
                     iteracionMejor = i
         else: break
 
-    return (xMejor, yMejor, evalMejor, iteracionMejor, valores_por_iteracion)
+    return (xMejor, yMejor, evalMejor, iteracionMejor, valores_por_iteracion, Duracion)
 
 TiempoFinal = timeit.default_timer()
 Duracion = TiempoFinal - TiempoInicio
 
 Limites = (-512, 512)
-Iteraciones = 5000
+Iteraciones = 1200
 Salto = 20           
-TempIni = 5000    
-EnfriamientoRate = 0.95
-TempFinal = 0.01
+TempIni = 78000
+EnfriamientoRate = 0.78
+TempFinal = 0.0001
 
-results = []
+xMejor, yMejor, evalMejor, iteracionMejor, valores_por_iteracion, Duracion = simulated_annealing(Funcion, Limites, Iteraciones, Salto, TempIni, EnfriamientoRate, TempFinal)
 
-for execution in range(10): 
+print('El tiempo en encontrar la mejor solucion fue de: %.17f ' % Duracion)
+print("La mejor solucion encontrada:", evalMejor)
+print('Valores con los que se obtuvo esa solucion: x=%.6f, y=%.6f)' % (xMejor, yMejor))
+print("Mejor solucion encontrada en la iteracion: ", iteracionMejor)
 
-    xMejor, yMejor, evalMejor, iteracionMejor, valores_por_iteracion = simulated_annealing(Funcion, Limites, Iteraciones, Salto, TempIni, EnfriamientoRate, TempFinal)
-
-    print('El tiempo en encontrar la mejor solucion fue de: %.17f ' % Duracion)
-    print("La mejor solucion encontrada:", evalMejor)
-    print('Valores con los que se obtuvo esa solucion: x=%.6f, y=%.6f)' % (xMejor, yMejor))
-    print("Mejor solucion encontrada en la iteracion: ", iteracionMejor)
-
-    plt.figure(figsize=(10, 5))
-    plt.plot(valores_por_iteracion, marker='o', linestyle='-', color='b')
-    plt.title('Valor de la función objetivo por iteración')
-    plt.xlabel('Iteración')
-    plt.ylabel('Valor de la función objetivo')
-    plt.grid(True)
-    plt.show()
-
-    results.append({
-        'Duracion': Duracion,
-        'Mejor solución': evalMejor,
-        'Valores de la solución': (xMejor, yMejor),
-        'Mejor solución encontrada': iteracionMejor
-    })
-
-df = pd.DataFrame(results)
-df.to_csv("resultados_enfriamiento_simulado.csv", index=False, sep=";")
+plt.figure(figsize=(10, 5))
+plt.plot(valores_por_iteracion, marker='o', linestyle='-', color='b')
+plt.title('Valor de la función objetivo por iteración')
+plt.xlabel('Iteración')
+plt.ylabel('Valor de la función objetivo')
+plt.grid(True)
+plt.show()
