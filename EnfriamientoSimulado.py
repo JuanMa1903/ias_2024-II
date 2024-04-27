@@ -9,10 +9,10 @@ import math
 import timeit
 import matplotlib.pyplot as plt
 
-TiempoInicio = timeit.default_timer()
-
 def Funcion(x, y):
     return -(y + 47) * math.sin(math.sqrt(abs(x/2 + (y + 47)))) - x * math.sin(math.sqrt(abs(x - (y + 47))))
+
+TiempoInicio = timeit.default_timer()
 
 def simulated_annealing(funcion, limites, iteraciones, salto, temp, enfriamientoRate, tempFinal):
 
@@ -22,6 +22,7 @@ def simulated_annealing(funcion, limites, iteraciones, salto, temp, enfriamiento
     iteracionMejor = 0
     valores_por_iteracion = []
     
+    random.seed(1)
     for i in range(iteraciones):
         temp *= enfriamientoRate
         if temp>tempFinal:
@@ -38,19 +39,19 @@ def simulated_annealing(funcion, limites, iteraciones, salto, temp, enfriamiento
                     iteracionMejor = i
         else: break
 
-    return (xMejor, yMejor, evalMejor, iteracionMejor, valores_por_iteracion)
+    return (xMejor, yMejor, evalMejor, iteracionMejor, valores_por_iteracion, Duracion)
 
 TiempoFinal = timeit.default_timer()
 Duracion = TiempoFinal - TiempoInicio
 
 Limites = (-512, 512)
-Iteraciones = 10000  
+Iteraciones = 1200
 Salto = 20           
-TempIni = 1000000    
-EnfriamientoRate = 0.9999
-TempFinal = 0.00001
+TempIni = 78000
+EnfriamientoRate = 0.78
+TempFinal = 0.0001
 
-xMejor, yMejor, evalMejor, iteracionMejor, valores_por_iteracion = simulated_annealing(Funcion, Limites, Iteraciones, Salto, TempIni, EnfriamientoRate, TempFinal)
+xMejor, yMejor, evalMejor, iteracionMejor, valores_por_iteracion, Duracion = simulated_annealing(Funcion, Limites, Iteraciones, Salto, TempIni, EnfriamientoRate, TempFinal)
 
 print('El tiempo en encontrar la mejor solucion fue de: %.17f ' % Duracion)
 print("La mejor solucion encontrada:", evalMejor)
@@ -64,4 +65,3 @@ plt.xlabel('Iteración')
 plt.ylabel('Valor de la función objetivo')
 plt.grid(True)
 plt.show()
-
