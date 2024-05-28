@@ -35,7 +35,7 @@ def initialize_population(pop_size, weight_dim):
     return np.random.randn(pop_size, weight_dim)
 
 # Estrategia de evolución diferencial
-def differential_evolution(X, Y, generations, pop_size=20, F=0.8, CR=0.9):
+def differential_evolution(X, Y, generations, pop_size=20, F=0.8, CR=0.9, tolerance=1e-5):
     weight_dim = 48  # 16 pesos en W1 y 32 pesos en W2
     population = initialize_population(pop_size, weight_dim)
     best_individual = None
@@ -61,7 +61,12 @@ def differential_evolution(X, Y, generations, pop_size=20, F=0.8, CR=0.9):
             else:
                 new_population.append(population[i])
         population = np.array(new_population)
-        print(f'Generation {generation}: Best Fitness = {best_fitness}')
+        
+        
+        # Condición de parada si el fitness es menor que el umbral de tolerancia
+        if best_fitness < tolerance:
+            print(f'Stopping early at generation {generation} with fitness {best_fitness}')
+            break
     
     return best_individual
 
@@ -95,6 +100,6 @@ def classify_point(x, weights):
     return np.argmax(output)
 
 # Ejemplo de clasificación de un punto
-test_point = np.array([0.5, -0.5])
+test_point = np.array([120, -120])
 quadrant = classify_point(test_point, best_weights)
 print(f'El punto {test_point} pertenece al cuadrante {quadrant + 1}')
